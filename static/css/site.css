@@ -15,7 +15,7 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  font-family: "Montserrat", sans-serif!important;
+  
 }
 
 /* Prevent media overflow */
@@ -140,8 +140,8 @@ iframe {
 
 /* Category button - preserve slate colors */
 .category-badge {
-  background-color: #f1f5f9 !important;
-  color: #334155 !important;
+  background-color: #ECFDF5 !important;
+  color: #0B8266 !important;
   display: inline-block !important;
 }
 
@@ -319,7 +319,7 @@ iframe {
 ======================================== */
 
 .site-offer-strip {
-  background: rgb(56, 252, 154)!important;
+  background: #B6F500!important;
   color: #181818!important;
 
   overflow: hidden;
