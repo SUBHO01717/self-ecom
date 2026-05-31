@@ -17,11 +17,11 @@ def mark_completed(modeladmin, request, queryset):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "full_name", "phone", "status", "payment_method", "payment_verified", "subtotal", "discount_amount", "total", "created_at")
-    list_filter = ("status", "payment_method", "payment_verified", "created_at")
+    list_display = ("id", "full_name", "phone", "status", "payment_method", "payment_verified", "subtotal", "shipping_cost", "discount_amount", "total", "created_at")
+    list_filter = ("status", "payment_method", "payment_verified", "created_at", "shipping_area")
     list_editable = ("status", "payment_verified")
     search_fields = ("full_name", "phone", "email", "transaction_id", "promo_code")
-    readonly_fields = ("subtotal", "promo_code", "discount_amount", "total", "purchase_pixel_pending", "purchase_pixel_fired", "created_at", "updated_at")
+    readonly_fields = ("subtotal", "promo_code", "discount_amount", "shipping_cost", "total", "purchase_pixel_pending", "purchase_pixel_fired", "created_at", "updated_at")
     inlines = [OrderItemInline]
     actions = [mark_completed]
 

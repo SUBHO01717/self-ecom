@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Banner, OfferStrip, SiteSettings
+from .models import Banner, OfferStrip, SiteSettings, ShippingArea
 
 
 COLOR_FIELDS = (
@@ -315,3 +315,10 @@ class OfferStripAdmin(admin.ModelAdmin):
         "text",
     )
 
+
+@admin.register(ShippingArea)
+class ShippingAreaAdmin(admin.ModelAdmin):
+    list_display = ("name", "courier_fee", "is_active", "created_at")
+    list_editable = ("courier_fee", "is_active")
+    search_fields = ("name",)
+    list_filter = ("is_active",)

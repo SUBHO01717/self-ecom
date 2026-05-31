@@ -67,6 +67,17 @@
           <span class="font-semibold">-৳{{ order.discount_amount }}</span>
         </div>
       {% endif %}
+      {% if order.shipping_area %}
+        <div class="flex justify-between text-slate-600">
+          <span>Shipping ({{ order.shipping_area.name }})</span>
+          <span class="font-semibold">৳{{ order.shipping_cost }}</span>
+        </div>
+      {% elif order.shipping_cost > 0 %}
+        <div class="flex justify-between text-slate-600">
+          <span>Shipping</span>
+          <span class="font-semibold">৳{{ order.shipping_cost }}</span>
+        </div>
+      {% endif %}
       <div class="border-t pt-3 flex justify-between text-base font-bold">
         <span>Total</span>
         <span class="text-emerald-700">৳{{ order.total }}</span>
@@ -98,6 +109,12 @@
         <div>
           <p class="text-xs font-semibold uppercase text-slate-500">Transaction ID</p>
           <p class="mt-1 text-slate-900">{{ order.transaction_id }}</p>
+        </div>
+      {% endif %}
+      {% if order.shipping_area %}
+        <div>
+          <p class="text-xs font-semibold uppercase text-slate-500">Shipping Area</p>
+          <p class="mt-1 text-slate-900">{{ order.shipping_area.name }} — ৳{{ order.shipping_cost }}</p>
         </div>
       {% endif %}
     </div>

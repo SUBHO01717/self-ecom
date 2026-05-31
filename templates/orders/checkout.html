@@ -1,5 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+  .shipping-area-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #fff;
+  }
+  .shipping-area-card:hover { border-color: #047857; background: #f0fdf4; }
+  .shipping-area-card.selected { border-color: #047857; background: #f0fdf4; }
+  .shipping-area-card input[type="radio"] { accent-color: #047857; width: 18px; height: 18px; }
+  .shipping-area-label { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
+  .shipping-area-fee { font-weight: 700; color: #047857; font-size: 0.95rem; }
+  .shipping-section-title { font-size: 0.875rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; display: block; }
+  .field-input {
+    margin-top: 8px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-input:focus { border-color: #047857; box-shadow: 0 0 0 2px #bbf7d0; }
+</style>
+
 <section class="mx-auto grid max-w-6xl gap-8 px-4 py-12 lg:grid-cols-[1fr_380px]">
   <form method="post" class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
     {% csrf_token %}
@@ -14,20 +48,54 @@
 
     <div class="mt-8 grid gap-6 md:grid-cols-2">
       {% for field in form %}
-        <div class="{% if field.name in 'shipping_address' %}md:col-span-2{% endif %}">
-          <label class="block text-sm font-semibold text-slate-900">
-            {{ field.label }}
-            {% if field.field.required %}<span class="text-red-600">*</span>{% endif %}
-          </label>
-          {% if field.field.widget.input_type == 'textarea' %}
-            <textarea name="{{ field.name }}" class="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3" required></textarea>
-          {% else %}
+        {% if field.name == "shipping_area" %}
+          <div class="md:col-span-2">
+            <span class="shipping-section-title">
+              Shipping Area <span style="color:#dc2626;">*</span>
+            </span>
+            <div id="shipping-area-list">
+              {% for area in shipping_areas %}
+                <label class="shipping-area-card {% if selected_area.pk == area.pk %}selected{% endif %}" id="area-card-{{ area.pk }}">
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="radio" name="shipping_area" value="{{ area.pk }}"
+                      {% if selected_area.pk == area.pk %}checked{% endif %}
+                      onchange="updateShippingSelection(this, {{ area.courier_fee }}, '{{ area.name }}')"
+                    >
+                    <span class="shipping-area-label">{{ area.name }}</span>
+                  </div>
+                  <span class="shipping-area-fee">৳{{ area.courier_fee }}</span>
+                </label>
+              {% empty %}
+                <p style="color:#64748b;font-size:0.875rem;">No shipping areas configured yet.</p>
+              {% endfor %}
+            </div>
+            {% if field.errors %}
+              <span class="mt-1 block text-sm text-red-600">{{ field.errors }}</span>
+            {% endif %}
+          </div>
+        {% elif field.name == "shipping_address" %}
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-slate-900">
+              {{ field.label }}
+              {% if field.field.required %}<span class="text-red-600">*</span>{% endif %}
+            </label>
+            <textarea name="{{ field.name }}" class="field-input" style="min-height:96px;resize:vertical;" rows="4">{{ field.value|default:'' }}</textarea>
+            {% if field.errors %}
+              <span class="mt-1 block text-sm text-red-600">{{ field.errors }}</span>
+            {% endif %}
+          </div>
+        {% else %}
+          <div>
+            <label class="block text-sm font-semibold text-slate-900">
+              {{ field.label }}
+              {% if field.field.required %}<span class="text-red-600">*</span>{% endif %}
+            </label>
             {{ field }}
-          {% endif %}
-          {% if field.errors %}
-            <span class="mt-1 block text-sm text-red-600">{{ field.errors }}</span>
-          {% endif %}
-        </div>
+            {% if field.errors %}
+              <span class="mt-1 block text-sm text-red-600">{{ field.errors }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
       {% endfor %}
     </div>
 
@@ -36,7 +104,7 @@
 
   <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-20">
     <h2 class="text-lg font-bold text-slate-900">Order Summary</h2>
-    
+
     <!-- Order Items -->
     <div class="mt-6 space-y-3 border-b pb-6">
       {% for item in cart %}
@@ -74,6 +142,10 @@
         <span>Subtotal</span>
         <span class="font-semibold">৳{{ checkout_subtotal }}</span>
       </div>
+      <div class="flex justify-between text-slate-600" id="summary-shipping-row" style="{% if not shipping_cost %}display:none;{% endif %}">
+        <span>Shipping (<span id="summary-area-name">{{ selected_area.name|default:'' }}</span>)</span>
+        <span class="font-semibold" id="summary-shipping-cost">৳{{ shipping_cost }}</span>
+      </div>
       {% if discount_amount > 0 %}
         <div class="flex justify-between text-emerald-700">
           <span>Discount</span>
@@ -82,9 +154,38 @@
       {% endif %}
       <div class="flex justify-between border-t pt-3 text-base font-bold text-slate-900">
         <span>Total</span>
-        <span class="text-emerald-700">৳{{ checkout_total }}</span>
+        <span class="text-emerald-700" id="summary-total">৳{{ checkout_total }}</span>
       </div>
     </div>
   </aside>
 </section>
+
+<script>
+  var baseSubtotal = parseFloat("{{ checkout_subtotal }}") || 0;
+  var discountAmount = parseFloat("{{ discount_amount }}") || 0;
+
+  function updateShippingSelection(radio, fee, areaName) {
+    // Update card highlight
+    document.querySelectorAll('.shipping-area-card').forEach(function(card) {
+      card.classList.remove('selected');
+    });
+    radio.closest('.shipping-area-card').classList.add('selected');
+
+    // Update summary sidebar
+    var row = document.getElementById('summary-shipping-row');
+    var costEl = document.getElementById('summary-shipping-cost');
+    var nameEl = document.getElementById('summary-area-name');
+    var totalEl = document.getElementById('summary-total');
+
+    if (fee > 0) {
+      row.style.display = 'flex';
+      costEl.textContent = '৳' + fee.toFixed(2);
+      nameEl.textContent = areaName;
+    } else {
+      row.style.display = 'none';
+    }
+    var newTotal = baseSubtotal - discountAmount + fee;
+    totalEl.textContent = '৳' + newTotal.toFixed(2);
+  }
+</script>
 {% endblock %}

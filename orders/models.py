@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from products.models import Product
+from settings_manager.models import ShippingArea
 
 
 class PromoCode(models.Model):
@@ -81,6 +82,8 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=20, choices=PaymentMethod.choices, default=PaymentMethod.COD)
     transaction_id = models.CharField(max_length=120, blank=True)
     payment_verified = models.BooleanField(default=False)
+    shipping_area = models.ForeignKey(ShippingArea, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders")
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
     promo_code = models.CharField(max_length=40, blank=True)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))

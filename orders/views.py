@@ -9,7 +9,7 @@ from django.utils.crypto import get_random_string
 
 from cart.cart import Cart
 from customers.models import CustomerProfile
-from settings_manager.models import SiteSettings
+from settings_manager.models import SiteSettings, ShippingArea
 from .forms import CheckoutForm
 from .models import Order, OrderItem, PromoCode
 
@@ -52,7 +52,22 @@ def checkout(request):
         else:
             messages.error(request, "Invalid promo code.")
             cart.remove_promo_code()
-    total = subtotal - discount_amount
+
+    # Determine shipping cost from selected area
+    shipping_areas = ShippingArea.objects.filter(is_active=True)
+    shipping_cost = 0
+    selected_area_id = request.POST.get("shipping_area") or request.session.get("selected_shipping_area_id")
+    selected_area = None
+    if selected_area_id:
+        try:
+            selected_area = ShippingArea.objects.get(pk=selected_area_id, is_active=True)
+            shipping_cost = selected_area.courier_fee
+            request.session["selected_shipping_area_id"] = selected_area.pk
+        except ShippingArea.DoesNotExist:
+            selected_area = None
+            shipping_cost = 0
+
+    total = subtotal - discount_amount + shipping_cost
 
     if request.method == "POST" and request.POST.get("promo_action") == "apply":
         code = request.POST.get("promo_code", "").strip()
@@ -86,6 +101,8 @@ def checkout(request):
             order.subtotal = subtotal
             order.promo_code = promo.code if promo else ""
             order.discount_amount = discount_amount
+            order.shipping_area = selected_area
+            order.shipping_cost = shipping_cost
             order.total = total
             user, raw_password = _get_or_create_customer(order)
             order.customer = user
@@ -109,6 +126,7 @@ def checkout(request):
             if SiteSettings.load().email_enabled and order.email:
                 send_mail("Your Daily Essentials order", f"Thanks for your order #{order.pk}. Status: Pending.", None, [order.email], fail_silently=True)
             cart.clear()
+            request.session.pop("selected_shipping_area_id", None)
             login(request, user)
         messages.success(request, "Order placed successfully. Your order is pending confirmation.")
         return redirect("orders:detail", order.pk)
@@ -124,6 +142,9 @@ def checkout(request):
             "discount_amount": discount_amount,
             "checkout_subtotal": subtotal,
             "checkout_total": total,
+            "shipping_areas": shipping_areas,
+            "shipping_cost": shipping_cost,
+            "selected_area": selected_area,
         },
     )
 
