@@ -32,59 +32,6 @@ class SEOFields(models.Model):
         abstract = True
 
 
-# class SiteSettings(SEOFields):
-#     class FontFamily(models.TextChoices):
-#         INTER = "Inter, Arial, sans-serif", "Inter / Arial"
-#         POPPINS = "Poppins, Arial, sans-serif", "Poppins"
-#         ROBOTO = "Roboto, Arial, sans-serif", "Roboto"
-#         LATO = "Lato, Arial, sans-serif", "Lato"
-#         GEORGIA = "Georgia, serif", "Georgia"
-#         SYSTEM = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "System UI"
-
-#     site_name = models.CharField(max_length=120, default="Daily Essentials")
-#     font_family = models.CharField(
-#         max_length=120,
-#         choices=FontFamily.choices,
-#         default=FontFamily.INTER,
-#         help_text="Controls the main font family across the storefront.",
-#     )
-#     primary_color = models.CharField(max_length=7, default="#047857", help_text="Primary brand color. Example: #047857")
-#     secondary_color = models.CharField(max_length=7, default="#0f172a", help_text="Secondary dark color. Example: #0f172a")
-#     accent_color = models.CharField(max_length=7, default="#e11d48", help_text="Accent color for discount badges and highlights.")
-#     body_bg_color = models.CharField(max_length=7, default="#f8fafc", help_text="Main page background color.")
-#     text_color = models.CharField(max_length=7, default="#0f172a", help_text="Main text color.")
-#     navbar_bg_color = models.CharField(max_length=7, default="#ffffff", help_text="Navbar background color.")
-#     navbar_text_color = models.CharField(max_length=7, default="#0f172a", help_text="Header text color - controls the color of all text, icons, and links in the header/navbar.")
-#     footer_bg_color = models.CharField(max_length=7, default="#ffffff", help_text="Footer background color.")
-#     footer_text_color = models.CharField(max_length=7, default="#475569", help_text="Footer text color - controls the color of all text, icons, and links in the footer.")
-#     button_bg_color = models.CharField(max_length=7, default="#047857", help_text="Main button background color.")
-#     button_text_color = models.CharField(max_length=7, default="#ffffff", help_text="Main button text color.")
-#     button_hover_bg_color = models.CharField(max_length=7, default="#065f46", help_text="Main button hover background color.")
-#     link_color = models.CharField(max_length=7, default="#047857", help_text="Link and brand text color.")
-#     facebook_pixel_id = models.CharField(max_length=80, blank=True)
-#     google_analytics_id = models.CharField(max_length=80, blank=True)
-#     custom_header_scripts = models.TextField(blank=True)
-#     custom_footer_scripts = models.TextField(blank=True)
-#     email_enabled = models.BooleanField(default=False)
-#     facebook_url = models.URLField(blank=True)
-#     instagram_url = models.URLField(blank=True)
-#     tiktok_url = models.URLField(blank=True)
-#     youtube_url = models.URLField(blank=True)
-#     whatsapp_number = models.CharField(max_length=32, blank=True)
-
-#     class Meta:
-#         verbose_name = "Site settings"
-#         verbose_name_plural = "Site settings"
-
-#     def __str__(self):
-#         return self.site_name
-
-#     @classmethod
-#     def load(cls):
-#         obj, _created = cls.objects.get_or_create(pk=1)
-#         return obj
-
-
 class Banner(models.Model):
     title = models.CharField(max_length=160)
     subtitle = models.CharField(max_length=255, blank=True)
@@ -122,6 +69,7 @@ class OfferStrip(models.Model):
 class SiteSettings(SEOFields):
     class FontFamily(models.TextChoices):
         INTER = "Inter, Arial, sans-serif", "Inter / Arial"
+        MONTSERAT = "Montserrat, Arial, sans-serif", "Montserrat"
         POPPINS = "Poppins, Arial, sans-serif", "Poppins"
         ROBOTO = "Roboto, Arial, sans-serif", "Roboto"
         LATO = "Lato, Arial, sans-serif", "Lato"
