@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Announcement Bar -->
+{% if offers %}
+<div style="max-width:1280px;margin:0 auto;padding:12px 12px 4px;">
+  <section class="site-offer-strip"
+           style="border-radius:14px;overflow:hidden;margin-bottom:4px;position:relative;">
+    <div class="site-offer-marquee">
+      <div class="site-offer-marquee-track">
+        {% for offer in offers %}
+        <span style="font-size:12px;display:flex;align-items:center;gap:6px;">● {{ offer.text }}</span>
+        {% endfor %}
+        {% for offer in offers %}
+        <span style="font-size:12px;display:flex;align-items:center;gap:6px;" aria-hidden="true">● {{ offer.text }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% else %}
+<section class="site-offer-strip">
+  <div class="site-offer-marquee">
+    <div class="site-offer-marquee-track">
+      <span style="font-size:12px;">🚚 Free delivery over ৳1000</span>
+      <span style="font-size:12px;">🏷️ 10% off first order</span>
+      <span style="font-size:12px;">⏰ Fresh deals every morning</span>
+      <span style="font-size:12px;">💳 bKash & Nagad supported</span>
+      <span style="font-size:12px;" aria-hidden="true">🚚 Free delivery over ৳1000</span>
+      <span style="font-size:12px;" aria-hidden="true">🏷️ 10% off first order</span>
+      <span style="font-size:12px;" aria-hidden="true">⏰ Fresh deals every morning</span>
+      <span style="font-size:12px;" aria-hidden="true">💳 bKash & Nagad supported</span>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div style="max-width:1280px;margin:0 auto;padding:12px 1rem 2rem;">
+
+  <!-- Hero Slider -->
+  <section style="border-radius:14px;overflow:hidden;margin-bottom:12px;position:relative;" data-hero-slider>
+    <div class="hero-slider-track" style="display:flex;transition:transform 0.7s ease;">
+      {% for banner in banners %}
+        <div style="position:relative;min-width:100%;">
+          <div style="position:relative;height:clamp(200px,40vw,460px);background:#0f172a;">
+            <img src="{{ banner.display_image_url }}" alt="{{ banner.title }}"
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+            <div style="position:absolute;inset:0;background:rgba(15,23,42,0.45);"></div>
+          </div>
+          <div style="position:absolute;inset:0;max-width:1280px;margin:0 auto;display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem 2rem;">
+            <div style="max-width:520px;">
+              <h1 style="color:#fff;font-size:clamp(1.3rem,3vw,2.2rem);font-weight:600;margin-bottom:8px;">{{ banner.title }}</h1>
+              {% if banner.subtitle %}<p style="color:#94a3b8;font-size:13px;margin-bottom:1rem;">{{ banner.subtitle }}</p>{% endif %}
+              {% if banner.button_text %}
+                <a href="{{ banner.button_url }}" class="site-btn" style="display:inline-flex;">{{ banner.button_text }}</a>
+              {% endif %}
+            </div>
+          </div>
+          <span style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:5px 14px;font-size:11px;">Limited time offer</span>
+        </div>
+      {% empty %}
+        <div style="position:relative;min-width:100%;background:linear-gradient(135deg,#0f172a 60%,#1e3a5f);min-height:220px;display:flex;align-items:center;padding:2.5rem;">
+          <div>
+            <h1 style="color:#fff;font-size:1.8rem;font-weight:600;margin-bottom:8px;">Daily Essentials</h1>
+            <p style="color:#94a3b8;font-size:13px;margin-bottom:1rem;">Your trusted store for everyday products</p>
+            <a href="{% url 'products:shop' %}" class="site-btn">Shop Now</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if banners|length > 1 %}
+      <button type="button" class="hero-slider-prev" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:none;" aria-label="Previous">‹</button>
+      <button type="button" class="hero-slider-next" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:none;" aria-label="Next">›</button>
+      <div class="hero-slider-dots" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;">
+        {% for banner in banners %}
+          <button type="button" style="width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,0.5);cursor:pointer;" aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Top Categories -->
+  {% if top_categories %}
+  <div class="de-section">
+    <div class="de-section-header">
+      <div class="de-section-title">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Top Categories
+      </div>
+      <a href="{% url 'categories:list' %}" class="de-view-all">View all →</a>
+    </div>
+    <div class="de-cats">
+      {% for category in top_categories %}
+        <a href="{{ category.get_absolute_url }}" class="de-cat-card">
+          <div class="de-cat-icon">
+            {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}">
+            {% else %}<span style="font-size:22px;">🛍️</span>{% endif %}
+          </div>
+          <div class="de-cat-name">{{ category.name }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- New Arrivals -->
+  {% if new_arrivals %}
+  <div class="de-section">
+    <div class="de-section-header">
+      <div class="de-section-title">
+        ✨ New Arrivals
+        <span class="de-section-badge">{{ new_arrivals|length }} items</span>
+      </div>
+      <a href="{% url 'products:shop' %}?new=1" class="de-view-all">View all →</a>
+    </div>
+    <div class="de-products">
+      {% for product in new_arrivals %}{% include "includes/product_card.html" %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Featured Products -->
+  {% if featured_products %}
+  <div class="de-section">
+    <div class="de-section-header">
+      <div class="de-section-title">
+        ⭐ Featured Products
+      </div>
+      <a href="{% url 'products:shop' %}?featured=1" class="de-view-all">View all →</a>
+    </div>
+    <div class="de-products">
+      {% for product in featured_products %}{% include "includes/product_card.html" %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Best Sellers -->
+  {% if best_sellers %}
+  <div class="de-section">
+    <div class="de-section-header">
+      <div class="de-section-title">
+        🔥 Best Sellers
+      </div>
+      <a href="{% url 'products:shop' %}?bestseller=1" class="de-view-all">View all →</a>
+    </div>
+    <div class="de-products">
+      {% for product in best_sellers %}{% include "includes/product_card.html" %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  (() => {
+    const slider = document.querySelector("[data-hero-slider]");
+    if (!slider) return;
+    const track = slider.querySelector(".hero-slider-track");
+    const slides = Array.from(track.children);
+    const dots = Array.from(slider.querySelectorAll(".hero-slider-dots button"));
+    const prev = slider.querySelector(".hero-slider-prev");
+    const next = slider.querySelector(".hero-slider-next");
+    if (slides.length <= 1) return;
+    if (prev) prev.style.display = "block";
+    if (next) next.style.display = "block";
+    let current = 0, timer;
+    const show = i => {
+      current = (i + slides.length) % slides.length;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, idx) => {
+        d.style.background = idx === current ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)";
+      });
+    };
+    const start = () => { clearInterval(timer); timer = setInterval(() => show(current + 1), 5000); };
+    prev?.addEventListener("click", () => { show(current - 1); start(); });
+    next?.addEventListener("click", () => { show(current + 1); start(); });
+    dots.forEach((d, i) => d.addEventListener("click", () => { show(i); start(); }));
+    show(0); start();
+  })();
+</script>
+{% endblock %}

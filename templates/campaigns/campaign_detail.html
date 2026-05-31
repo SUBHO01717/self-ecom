@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+  {% if campaign.banner_image %}<img src="{{ campaign.banner_image.url }}" alt="{{ campaign.title }}" class="h-72 w-full object-cover">{% endif %}
+  <div class="mx-auto max-w-7xl px-4 py-10">
+    <h1 class="text-3xl font-bold">{{ campaign.title }}</h1>
+    <p class="mt-2 text-lg text-emerald-700">{{ campaign.offer_text }}</p>
+    <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">{% for product in products %}{% include "includes/product_card.html" %}{% empty %}<p class="col-span-full">No campaign products yet.</p>{% endfor %}</div>
+  </div>
+</section>
+{% endblock %}

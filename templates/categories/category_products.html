@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:1280px;margin:0 auto;padding:1rem 1rem 3rem;">
+
+  <div style="padding:1.25rem 0 1rem;">
+    <h1 style="font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">{{ category.name }}</h1>
+    {% if category.description %}
+      <p style="font-size:13px;color:var(--text-secondary);max-width:640px;">{{ category.description }}</p>
+    {% endif %}
+  </div>
+
+  <div class="de-products">
+    {% for product in products %}
+      {% include "includes/product_card.html" %}
+    {% empty %}
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--bg-card);border-radius:var(--radius-lg);border:0.5px solid var(--border-md);">
+        <p style="color:var(--text-muted);font-size:13px;">No products in this category yet.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

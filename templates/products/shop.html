@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+  {% if page_obj.has_previous %}
+    <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+  {% endif %}
+  {% if page_obj.has_next %}
+    <link rel="next" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1280px;margin:0 auto;padding:1rem 1rem 3rem;">
+
+  <!-- Page Header -->
+  <div style="padding:1.25rem 0 1rem;">
+    <h1 style="font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Shop</h1>
+    <p style="font-size:13px;color:var(--text-secondary);">Browse our complete collection of products</p>
+  </div>
+
+  <div style="display:grid;gap:12px;align-items:start;" class="lg:grid-cols-[260px_1fr]">
+
+    <!-- Sidebar Filters -->
+    <aside class="de-sidebar lg:sticky" style="top:72px;">
+      <h2>Filters</h2>
+      <form method="get" id="filters-form" style="display:flex;flex-direction:column;gap:14px;">
+
+        <div>
+          <label>Category</label>
+          <select name="category" style="margin-top:6px;">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+              <option value="{{ category.slug }}" {% if request.GET.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label>Sort By</label>
+          <select name="sort" style="margin-top:6px;">
+            <option value="newest" {% if request.GET.sort != 'oldest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Price Range</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+            <input name="min_price" value="{{ request.GET.min_price }}" placeholder="Min (৳)" style="width:100%;margin-top:0;">
+            <input name="max_price" value="{{ request.GET.max_price }}" placeholder="Max (৳)" style="width:100%;margin-top:0;">
+          </div>
+        </div>
+
+        <div style="border-top:0.5px solid var(--border-md);padding-top:12px;">
+          <p style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">Options</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock %}checked{% endif %} style="width:auto;margin:0;padding:0;border:1px solid var(--border-md);">
+              In Stock
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" name="featured" value="1" {% if request.GET.featured %}checked{% endif %} style="width:auto;margin:0;padding:0;border:1px solid var(--border-md);">
+              Featured
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" name="new" value="1" {% if request.GET.new %}checked{% endif %} style="width:auto;margin:0;padding:0;border:1px solid var(--border-md);">
+              New
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" name="bestseller" value="1" {% if request.GET.bestseller %}checked{% endif %} style="width:auto;margin:0;padding:0;border:1px solid var(--border-md);">
+              Bestseller
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" name="campaign" value="1" {% if request.GET.campaign %}checked{% endif %} style="width:auto;margin:0;padding:0;border:1px solid var(--border-md);">
+              Campaign
+            </label>
+          </div>
+        </div>
+
+        {% if request.GET.category or request.GET.min_price or request.GET.max_price or request.GET.in_stock or request.GET.featured or request.GET.new or request.GET.bestseller or request.GET.campaign %}
+          <a href="{% url 'products:shop' %}" style="text-align:center;font-size:12px;font-weight:500;color:var(--green);">Clear All Filters</a>
+        {% endif %}
+      </form>
+    </aside>
+
+    <!-- Products Grid -->
+    <div>
+      {% if products %}
+        <div class="de-products">
+          {% for product in products %}
+            {% include "includes/product_card.html" %}
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="de-pagination" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-top:2rem;">
+          {% if page_obj.has_previous %}
+            <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+          {% endif %}
+          {% for num in paginator.page_range %}
+            {% if page_obj.number == num %}
+              <span class="active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+            <a href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last</a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+      {% else %}
+        <div style="text-align:center;padding:3rem;background:var(--bg-card);border-radius:var(--radius-lg);border:0.5px solid var(--border-md);">
+          <p style="color:var(--text-muted);font-size:13px;">No products matched your filters. Try adjusting your search criteria.</p>
+          <a href="{% url 'products:shop' %}" style="display:inline-block;margin-top:1rem;font-size:13px;color:var(--green);">Clear filters</a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filters-form');
+    form.querySelectorAll('select, input[type="checkbox"]').forEach(el => {
+      el.addEventListener('change', () => form.submit());
+    });
+    form.querySelectorAll('input[name="min_price"], input[name="max_price"]').forEach(input => {
+      input.addEventListener('blur', () => form.submit());
+      input.addEventListener('keypress', e => { if (e.key === 'Enter') form.submit(); });
+    });
+  });
+</script>
+{% endblock %}
