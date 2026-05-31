@@ -1,6 +1,8 @@
 from pathlib import Path
 
+from decimal import Decimal
 from django.conf import settings
+from django.core.validators import URLValidator
 from django.db import models
 
 
@@ -36,7 +38,12 @@ class Banner(models.Model):
     title = models.CharField(max_length=160)
     subtitle = models.CharField(max_length=255, blank=True)
     button_text = models.CharField(max_length=60, blank=True)
-    button_url = models.CharField(max_length=255, blank=True)
+    button_url = models.CharField(
+        max_length=255,
+        blank=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+        help_text="Use full absolute URLs starting with http:// or https://",
+    )
     background_image = models.ImageField(
         upload_to="banners/",
         help_text="Recommended: JPG, PNG, or WebP. Use a wide banner around 1920x700px. Avoid TIFF for browser display.",
@@ -67,193 +74,13 @@ class OfferStrip(models.Model):
         return self.text
 
 class SiteSettings(SEOFields):
-    class FontFamily(models.TextChoices):
-        INTER = "Inter, Arial, sans-serif", "Inter / Arial"
-        MONTSERAT = "Montserrat, Arial, sans-serif", "Montserrat"
-        POPPINS = "Poppins, Arial, sans-serif", "Poppins"
-        ROBOTO = "Roboto, Arial, sans-serif", "Roboto"
-        LATO = "Lato, Arial, sans-serif", "Lato"
-        GEORGIA = "Georgia, serif", "Georgia"
-        SYSTEM = "system-ui, sans-serif", "System UI"
-
     site_name = models.CharField(
         max_length=120,
         default="Daily Essentials"
     )
 
-    # =========================
-    # Typography
-    # =========================
-
-    font_family = models.CharField(
-        max_length=120,
-        choices=FontFamily.choices,
-        default=FontFamily.POPPINS,
-    )
-
-    body_bg_color = models.CharField(
-        max_length=7,
-        default="#f8fafc"
-    )
-
-    body_text_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    heading_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    link_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    link_hover_color = models.CharField(
-        max_length=7,
-        default="#065f46"
-    )
-
-    # =========================
-    # Header
-    # =========================
-
-    header_bg_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    header_text_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    header_nav_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    header_nav_hover_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    mobile_menu_icon_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    # =========================
-    # Header Cart Button
-    # =========================
-
-    header_cart_bg_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    header_cart_text_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    header_cart_hover_bg_color = models.CharField(
-        max_length=7,
-        default="#065f46"
-    )
-
-    # =========================
-    # Global Body Buttons
-    # =========================
-
-    body_button_bg_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    body_button_text_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    body_button_border_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    body_button_hover_bg_color = models.CharField(
-        max_length=7,
-        default="#065f46"
-    )
-
-    body_button_hover_text_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    # =========================
-    # Banner
-    # =========================
-
-    banner_text_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    banner_button_text_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    # =========================
-    # Footer
-    # =========================
-
-    footer_bg_color = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
-
-    footer_heading_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    footer_text_color = models.CharField(
-        max_length=7,
-        default="#475569"
-    )
-
-    footer_link_color = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    footer_link_hover_color = models.CharField(
-        max_length=7,
-        default="#065f46"
-    )
-
-    # =========================
-    # Footer Social Icons
-    # =========================
-
-    footer_social_icon_color = models.CharField(
-        max_length=7,
-        default="#0f172a"
-    )
-
-    footer_social_icon_hover_bg = models.CharField(
-        max_length=7,
-        default="#047857"
-    )
-
-    footer_social_icon_hover_text = models.CharField(
-        max_length=7,
-        default="#ffffff"
-    )
+    # CSS customization fields were removed. Global presentation now relies on fixed defaults
+    # in templates and static styles.
 
     # =========================
     # Product Details Page
@@ -272,6 +99,18 @@ class SiteSettings(SEOFields):
     show_cash_on_delivery_info = models.BooleanField(
         default=True,
         help_text="Show 'Cash on delivery' message"
+    )
+
+    cod_order_max_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        help_text="Maximum order total allowed for Cash on Delivery. Set to 0 to allow COD for all orders.",
+    )
+
+    max_orders_per_phone_per_day = models.PositiveIntegerField(
+        default=0,
+        help_text="Maximum number of orders allowed per phone number in 24 hours. Set 0 to allow unlimited orders.",
     )
 
     show_easy_returns_info = models.BooleanField(

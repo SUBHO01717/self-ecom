@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 defaults={
                     "subtitle": f"Save more on everyday picks batch {index}.",
                     "button_text": "Shop Now",
-                    "button_url": "/shop/",
+                    "button_url": "http://localhost:8000/shop/",
                     "background_image": image_paths[(index - 1) % len(image_paths)],
                     "is_active": True,
                     "display_order": index,

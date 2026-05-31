@@ -67,49 +67,35 @@
 
 <style>
   :root {
-      --site-font-family: {{ site_settings.font_family }};
-
-      --site-body-bg: {{ site_settings.body_bg_color }};
-      --site-body-text: {{ site_settings.body_text_color }};
-      --site-heading-color: {{ site_settings.heading_color }};
-
-      --site-link-color: {{ site_settings.link_color }};
-      --site-link-hover-color: {{ site_settings.link_hover_color }};
-
-      --site-header-bg: {{ site_settings.header_bg_color }};
-      --site-header-text: {{ site_settings.header_text_color }};
-      --site-header-nav: {{ site_settings.header_nav_color }};
-      --site-header-nav-hover: {{ site_settings.header_nav_hover_color }};
-
-      --site-mobile-menu-icon: {{ site_settings.mobile_menu_icon_color }};
-
-      --site-header-cart-bg: {{ site_settings.header_cart_bg_color }};
-      --site-header-cart-text: {{ site_settings.header_cart_text_color }};
-      --site-header-cart-hover-bg: {{ site_settings.header_cart_hover_bg_color }};
-
-      --site-button-bg: {{ site_settings.body_button_bg_color }};
-      --site-button-text: {{ site_settings.body_button_text_color }};
-      --site-button-border: {{ site_settings.body_button_border_color }};
-      --site-button-hover-bg: {{ site_settings.body_button_hover_bg_color }};
-      --site-button-hover-text: {{ site_settings.body_button_hover_text_color }};
-
-      --site-banner-text: {{ site_settings.banner_text_color }};
-      --site-banner-button-text: {{ site_settings.banner_button_text_color }};
-
-      --site-footer-bg: {{ site_settings.footer_bg_color }};
-      --site-footer-heading: {{ site_settings.footer_heading_color }};
-      --site-footer-text: {{ site_settings.footer_text_color }};
-
-      --site-footer-link: {{ site_settings.footer_link_color }};
-      --site-footer-link-hover: {{ site_settings.footer_link_hover_color }};
-
-      --site-footer-social: {{ site_settings.footer_social_icon_color }};
-      --site-footer-social-hover-bg: {{ site_settings.footer_social_icon_hover_bg }};
-      --site-footer-social-hover-text: {{ site_settings.footer_social_icon_hover_text }};
-
-      --site-primary: {{ site_settings.primary_color }};
-      --site-secondary: {{ site_settings.secondary_color }};
-      --site-accent: {{ site_settings.accent_color }};
+      --site-font-family: 'Inter', Arial, sans-serif;
+      --site-body-bg: #f8fafc;
+      --site-body-text: #0f172a;
+      --site-heading-color: #0f172a;
+      --site-link-color: #047857;
+      --site-link-hover-color: #065f46;
+      --site-header-bg: #ffffff;
+      --site-header-text: #0f172a;
+      --site-header-nav: #0f172a;
+      --site-header-nav-hover: #047857;
+      --site-mobile-menu-icon: #0f172a;
+      --site-button-bg: #047857;
+      --site-button-text: #ffffff;
+      --site-button-border: #047857;
+      --site-button-hover-bg: #065f46;
+      --site-button-hover-text: #ffffff;
+      --site-banner-text: #ffffff;
+      --site-banner-button-text: #ffffff;
+      --site-footer-bg: #ffffff;
+      --site-footer-heading: #0f172a;
+      --site-footer-text: #475569;
+      --site-footer-link: #047857;
+      --site-footer-link-hover: #065f46;
+      --site-footer-social: #0f172a;
+      --site-footer-social-hover-bg: #047857;
+      --site-footer-social-hover-text: #ffffff;
+      --site-primary: {{ site_settings.primary_color|default:'#047857' }};
+      --site-secondary: {{ site_settings.secondary_color|default:'#0f172a' }};
+      --site-accent: {{ site_settings.accent_color|default:'#e11d48' }};
   }
 </style>
 
@@ -123,7 +109,7 @@
     "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}",
     "description": "{{ site_settings.meta_description|default:'Quality daily essentials ecommerce store'|escapejs }}",
     "sameAs": [
-      {% if site_settings.facebook_page_url %}"{{ site_settings.facebook_page_url }}"{% endif %}
+      {% if site_settings.facebook_url %}"{{ site_settings.facebook_url }}"{% endif %}{% if site_settings.instagram_url %}{% if site_settings.facebook_url %},{% endif %}"{{ site_settings.instagram_url }}"{% endif %}{% if site_settings.tiktok_url %}{% if site_settings.facebook_url or site_settings.instagram_url %},{% endif %}"{{ site_settings.tiktok_url }}"{% endif %}{% if site_settings.youtube_url %}{% if site_settings.facebook_url or site_settings.instagram_url or site_settings.tiktok_url %},{% endif %}"{{ site_settings.youtube_url }}"{% endif %}
     ]
   }
   </script>
@@ -178,6 +164,7 @@
 </head>
 
 <body class="site-theme">
+  <a href="#main-content" class="skip-link"></a>
 
   <!-- Header -->
   <header class="site-navbar sticky top-0 z-50 border-b border-slate-200">
@@ -230,7 +217,8 @@
                 type="button"
                 id="mobile-menu-toggle"
                 aria-label="Toggle navigation menu"
-                aria-expanded="false">
+                aria-expanded="false"
+                aria-controls="mobile-menu">
 
           <svg xmlns="http://www.w3.org/2000/svg"
                class="h-7 w-7"
@@ -294,7 +282,7 @@
   {% endif %}
 
   <!-- Main -->
-  <main>
+  <main id="main-content" tabindex="-1">
     {% block content %}
     {% endblock %}
   </main>
@@ -418,8 +406,8 @@
   <!-- WhatsApp -->
   {% if site_settings.whatsapp_number %}
 
-    <a href="https://wa.me/{{ site_settings.whatsapp_number }}"
-       class="site-btn fixed bottom-5 right-5 z-50 rounded-full px-5 py-3 shadow-lg">
+    <a href="https://wa.me/{{ site_settings.whatsapp_number }}" style="color: white;"
+       class="fixed bottom-5 right-5 z-50 rounded-full px-5 py-3 bg-green-600 shadow-sm hover:scale-105 hover:shadow-md transition-all duration-200">
 
       WhatsApp
 

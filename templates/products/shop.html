@@ -80,7 +80,7 @@
 
         <!-- Clear All Link -->
         {% if request.GET.category or request.GET.min_price or request.GET.max_price or request.GET.in_stock or request.GET.featured or request.GET.new or request.GET.bestseller or request.GET.campaign %}
-          <a href="{% url 'products:shop' %}" class="mt-4 block text-center text-sm font-semibold transition" style="color: var(--site-primary);">Clear All Filters</a>
+          <a href="{% url 'products:shop' %}" class="mt-4 block text-center text-sm font-semibold text-primary transition hover:text-primary-dark">Clear All Filters</a>
         {% endif %}
       </form>
     </aside>

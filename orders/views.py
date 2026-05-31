@@ -1,10 +1,14 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 
 from cart.cart import Cart
@@ -116,6 +120,47 @@ def checkout(request):
         if promo_code and promo is None:
             messages.error(request, "Please apply a valid promo code or remove it before placing the order.")
             return redirect("orders:checkout")
+
+        cleaned = form.cleaned_data
+        payment_method = cleaned.get("payment_method")
+        max_cod_amount = SiteSettings.load().cod_order_max_amount
+        if payment_method == Order.PaymentMethod.COD and max_cod_amount > 0 and total > max_cod_amount:
+            messages.error(
+                request,
+                f"Cash on Delivery is only available for orders up to ৳{max_cod_amount}. Please choose another payment method."
+            )
+            return redirect("orders:checkout")
+
+        daily_order_limit = SiteSettings.load().max_orders_per_phone_per_day
+        if daily_order_limit > 0:
+            phone = cleaned.get("phone")
+            email = cleaned.get("email")
+            recent_orders = Order.objects.filter(
+                created_at__gte=timezone.now() - timedelta(hours=24),
+            ).filter(
+                Q(phone=phone) |
+                Q(email__iexact=email)
+            ).count()
+            if recent_orders >= daily_order_limit:
+                messages.error(
+                    request,
+                    f"You have reached the maximum of {daily_order_limit} orders in the last 24 hours. Please try again tomorrow or contact support."
+                )
+                return redirect("orders:checkout")
+
+        if payment_method == Order.PaymentMethod.COD:
+            recent_cod_orders = Order.objects.filter(
+                phone=cleaned.get("phone"),
+                payment_method=Order.PaymentMethod.COD,
+                created_at__gte=timezone.now() - timedelta(hours=24),
+            ).count()
+            if recent_cod_orders >= 3:
+                messages.error(
+                    request,
+                    "You have placed too many Cash on Delivery orders in the last 24 hours. Please use bKash or Nagad for this order."
+                )
+                return redirect("orders:checkout")
+
         with transaction.atomic():
             order = form.save(commit=False)
             order.subtotal = subtotal
