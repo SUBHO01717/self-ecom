@@ -1,0 +1,18 @@
+<section class="mx-auto max-w-7xl px-4 py-16">
+  <div class="mb-8 flex items-end justify-between">
+    <div>
+      <h2 class="text-3xl font-bold">{{ title }}</h2>
+      <p class="mt-1 text-slate-600">Check out our recommended products</p>
+    </div>
+    <a href="{% url 'products:shop' %}" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800">View all →</a>
+  </div>
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+    {% for product in products %}
+      {% include "includes/product_card.html" %}
+    {% empty %}
+      <div class="col-span-full rounded-xl border border-slate-200 bg-slate-50 py-8 text-center">
+        <p class="text-slate-600">No products available.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="relative overflow-hidden bg-slate-900" data-hero-slider>
+    <div class="hero-slider-track flex transition-transform duration-700 ease-out">
+      {% for banner in banners %}
+        <div class="relative min-w-full">
+          <div class="relative h-[300px] bg-slate-950 sm:h-[390px] lg:h-[520px]">
+            <img src="{{ banner.display_image_url }}" alt="{{ banner.title }}" class="absolute inset-0 h-full w-full object-contain lg:object-cover">
+            <div class="absolute inset-0 bg-slate-950/35"></div>
+          </div>
+          <div class="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-end px-4 pb-8 sm:pb-12">
+            <div class="max-w-2xl">
+              <h1 class="text-3xl font-bold md:text-5xl" style="color: var(--site-banner-text);">{{ banner.title }}</h1>
+              {% if banner.subtitle %}<p class="mt-3 max-w-xl text-base md:text-lg" style="color: var(--site-banner-text);">{{ banner.subtitle }}</p>{% endif %}
+              {% if banner.button_text %}<a href="{{ banner.button_url }}" class="mt-5 inline-flex rounded px-6 py-3 font-semibold site-btn" style="color: var(--site-banner-button-text);">{{ banner.button_text }}</a>{% endif %}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="mx-auto flex h-[360px] max-w-7xl flex-col justify-center px-4"><h1 class="text-4xl font-bold" style="color: var(--site-banner-text);">Daily Essentials</h1><p class="mt-3 text-lg" style="color: var(--site-banner-text);">Manage homepage banners from Django admin.</p></div>
+      {% endfor %}
+    </div>
+    {% if banners|length > 1 %}
+      <button type="button" class="hero-slider-prev absolute left-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/85 px-3 py-2 text-slate-900 shadow md:block" aria-label="Previous banner">‹</button>
+      <button type="button" class="hero-slider-next absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/85 px-3 py-2 text-slate-900 shadow md:block" aria-label="Next banner">›</button>
+      <div class="hero-slider-dots absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+        {% for banner in banners %}<button type="button" class="h-2.5 w-2.5 rounded-full bg-white/50" aria-label="Go to banner {{ forloop.counter }}"></button>{% endfor %}
+      </div>
+    {% endif %}
+  </section>
+  {% if offers %}
+    <section class="site-offer-strip overflow-hidden py-3">
+      <div class="site-offer-marquee">
+        <div class="site-offer-marquee-track">
+          {% for offer in offers %}<span>{{ offer.text }}</span>{% endfor %}
+          {% for offer in offers %}<span aria-hidden="true">{{ offer.text }}</span>{% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+  <section class="mx-auto max-w-7xl px-4 py-12">
+    <div class="mb-2 flex items-end justify-between">
+      <div>
+        <h2 class="text-3xl font-bold">Top Categories</h2>
+        <p class="mt-1 text-slate-600">Explore our most popular product categories</p>
+      </div>
+      <a href="{% url 'categories:list' %}" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800">View all →</a>
+    </div>
+    <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      {% for category in top_categories %}
+        <a href="{{ category.get_absolute_url }}" class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md hover:border-emerald-300">
+          <div class="relative overflow-hidden bg-slate-100">
+            {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" class="aspect-square w-full object-cover transition group-hover:scale-105">{% endif %}
+          </div>
+          <div class="p-4 text-center">
+            <span class="block font-semibold text-slate-900">{{ category.name }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% include "includes/product_section.html" with title="New Arrival" products=new_arrivals %}
+  {% include "includes/product_section.html" with title="Featured Products" products=featured_products %}
+  {% include "includes/product_section.html" with title="Best Sellers" products=best_sellers %}
+  <script>
+    (() => {
+      const slider = document.querySelector("[data-hero-slider]");
+      if (!slider) return;
+      const track = slider.querySelector(".hero-slider-track");
+      const slides = Array.from(track.children);
+      const dots = Array.from(slider.querySelectorAll(".hero-slider-dots button"));
+      if (slides.length <= 1) return;
+
+      let current = 0;
+      let timer;
+      const show = (index) => {
+        current = (index + slides.length) % slides.length;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((dot, dotIndex) => {
+          dot.classList.toggle("bg-white", dotIndex === current);
+          dot.classList.toggle("bg-white/50", dotIndex !== current);
+        });
+      };
+      const start = () => {
+        clearInterval(timer);
+        timer = setInterval(() => show(current + 1), 5000);
+      };
+
+      slider.querySelector(".hero-slider-prev")?.addEventListener("click", () => {
+        show(current - 1);
+        start();
+      });
+      slider.querySelector(".hero-slider-next")?.addEventListener("click", () => {
+        show(current + 1);
+        start();
+      });
+      dots.forEach((dot, index) => dot.addEventListener("click", () => {
+        show(index);
+        start();
+      }));
+      show(0);
+      start();
+    })();
+  </script>
+{% endblock %}

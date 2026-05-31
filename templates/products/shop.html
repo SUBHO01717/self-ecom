@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-7xl px-4 py-12">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold">Shop</h1>
+    <p class="mt-2 text-slate-600">Browse our complete collection of products</p>
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-[280px_1fr]">
+    <!-- Sidebar Filters (Desktop) / Top Filters (Mobile) -->
+    <aside class="h-fit rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-20 order-2 lg:order-1">
+      <h2 class="font-bold text-slate-900 mb-4">Filters</h2>
+      <form method="get" id="filters-form" class="space-y-4">
+        <!-- Category -->
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-900">Category</label>
+          <select name="category" class="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+              <option value="{{ category.slug }}" {% if request.GET.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-900">Sort By</label>
+          <select name="sort" class="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm">
+            <option value="newest" {% if request.GET.sort != 'oldest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+          </select>
+        </div>
+
+        <!-- Price Range -->
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-900">Price Range</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input name="min_price" value="{{ request.GET.min_price }}" placeholder="Min (৳)" class="rounded-lg border border-slate-300 p-2.5 text-sm">
+            <input name="max_price" value="{{ request.GET.max_price }}" placeholder="Max (৳)" class="rounded-lg border border-slate-300 p-2.5 text-sm">
+          </div>
+        </div>
+
+        <!-- Options - Inline without wrap -->
+        <div class="border-t pt-4">
+          <p class="mb-3 text-sm font-semibold text-slate-900">Options</p>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock %}checked{% endif %} class="rounded">
+              <span class="text-sm text-slate-700">In Stock</span>
+            </label>
+            <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" name="featured" value="1" {% if request.GET.featured %}checked{% endif %} class="rounded">
+              <span class="text-sm text-slate-700">Featured</span>
+            </label>
+            <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" name="new" value="1" {% if request.GET.new %}checked{% endif %} class="rounded">
+              <span class="text-sm text-slate-700">New</span>
+            </label>
+            <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" name="bestseller" value="1" {% if request.GET.bestseller %}checked{% endif %} class="rounded">
+              <span class="text-sm text-slate-700">Bestseller</span>
+            </label>
+            <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+              <input type="checkbox" name="campaign" value="1" {% if request.GET.campaign %}checked{% endif %} class="rounded">
+              <span class="text-sm text-slate-700">Campaign</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Clear All Link -->
+        {% if request.GET.category or request.GET.min_price or request.GET.max_price or request.GET.in_stock or request.GET.featured or request.GET.new or request.GET.bestseller or request.GET.campaign %}
+          <a href="{% url 'products:shop' %}" class="mt-4 block text-center text-sm font-semibold transition" style="color: var(--site-primary);">Clear All Filters</a>
+        {% endif %}
+      </form>
+    </aside>
+
+    <!-- Products Grid -->
+    <div class="order-1 lg:order-2">
+      {% if products %}
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 ">
+          {% for product in products %}
+            {% include "includes/product_card.html" %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="rounded-xl border border-slate-200 bg-slate-50 py-12 text-center">
+          <p class="text-slate-600">No products matched your filters. Try adjusting your search criteria.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filters-form');
+    const priceInputs = form.querySelectorAll('input[name="min_price"], input[name="max_price"]');
+    
+    // Auto-submit on select/checkbox change
+    form.querySelectorAll('select, input[type="checkbox"]').forEach(element => {
+      element.addEventListener('change', function() {
+        form.submit();
+      });
+    });
+
+    // Auto-submit on price input blur (to avoid too many submissions while typing)
+    priceInputs.forEach(input => {
+      input.addEventListener('blur', function() {
+        form.submit();
+      });
+      // Also submit on Enter key
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          form.submit();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

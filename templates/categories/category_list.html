@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="mx-auto max-w-7xl px-4 py-12">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold">Categories</h1>
+    <p class="mt-2 text-slate-600">Browse our complete selection of product categories</p>
+  </div>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    {% for category in categories %}
+      <a href="{{ category.get_absolute_url }}" class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-400">
+        <div class="relative h-48 overflow-hidden bg-slate-100">
+          {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-110">{% else %}<img src="{% static 'img/placeholder.svg' %}" alt="{{ category.name }}" class="h-full w-full object-cover">{% endif %}
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+        </div>
+        <div class="p-5">
+          <h2 class="text-lg font-bold text-slate-900">{{ category.name }}</h2>
+          <p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ category.description }}</p>
+          <div class="category-badge mt-4 inline-block rounded-full px-3 py-1 text-sm font-semibold 
+               transition bg-emerald-700 text-white group-hover:bg-emerald-800" 
+              style="background-color: #000000; color: #ffffff; !important"> Shop now →
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

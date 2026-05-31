@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-6xl px-4 py-12">
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <h1 class="text-4xl font-bold">My Account</h1>
+      <p class="mt-2 text-slate-600">Manage your profile and view your orders</p>
+    </div>
+    <a href="{% url 'customers:logout' %}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Logout</a>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="mb-8 grid gap-6 lg:grid-cols-[300px_1fr]">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-bold text-slate-900">Profile Information</h2>
+      <div class="mt-6 space-y-4">
+        <div>
+          <p class="text-xs font-semibold uppercase text-slate-500">Name</p>
+          <p class="mt-1 text-slate-900">{{ request.user.get_full_name|default:request.user.username }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase text-slate-500">Email</p>
+          <p class="mt-1 text-slate-900">{{ request.user.email }}</p>
+        </div>
+        {% if request.user.customer_profile.phone %}
+          <div>
+            <p class="text-xs font-semibold uppercase text-slate-500">Phone</p>
+            <p class="mt-1 text-slate-900">{{ request.user.customer_profile.phone }}</p>
+          </div>
+        {% endif %}
+        {% if request.user.customer_profile.shipping_address %}
+          <div>
+            <p class="text-xs font-semibold uppercase text-slate-500">Default Address</p>
+            <p class="mt-1 text-slate-900">{{ request.user.customer_profile.shipping_address|truncatewords:20 }}</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Orders Summary -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-bold text-slate-900">Quick Stats</h2>
+      <div class="mt-6 grid grid-cols-3 gap-4">
+        <div class="rounded-lg bg-emerald-50 p-4">
+          <p class="text-xs font-semibold uppercase text-emerald-700">Total Orders</p>
+          <p class="mt-2 text-2xl font-bold text-emerald-900">{{ orders|length }}</p>
+        </div>
+        <div class="rounded-lg bg-blue-50 p-4">
+          <p class="text-xs font-semibold uppercase text-blue-700">Pending</p>
+          <p class="mt-2 text-2xl font-bold text-blue-900">{{ orders|dictsort:"status"|length }}</p>
+        </div>
+        <div class="rounded-lg bg-purple-50 p-4">
+          <p class="text-xs font-semibold uppercase text-purple-700">Completed</p>
+          <p class="mt-2 text-2xl font-bold text-purple-900">{{ completed_orders_count }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Section -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-bold text-slate-900">Order History</h2>
+    
+    {% if orders %}
+      <div class="mt-6 grid gap-4 !bg-white">
+        {% for order in orders %}
+          <a href="{{ order.get_absolute_url }}" class=" rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50 group">
+            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center ">
+              <div class="flex-1 ">
+                <div class="flex items-center gap-3 ">
+                  <h3 class="font-semibold text-slate-900 ">Order #{{ order.pk }}</h3>
+                  <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold
+                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                    {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                    {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                    {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                    {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                    {% elif order.status == 'completed' %}bg-emerald-100 text-emerald-800
+                    {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                    {% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                </div>
+                <p class="mt-2 text-sm text-slate-600">
+                  {% if order.items.all %}
+                    {{ order.items.count }} item{{ order.items.count|pluralize }} • 
+                  {% endif %}
+                  Placed on <strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-lg font-bold text-emerald-700">৳{{ order.total }}</p>
+                <p class="mt-1 text-sm font-semibold text-slate-600 group-hover:text-emerald-700">View details →</p>
+              </div>
+            </div>
+            
+            <!-- Order Items Preview -->
+            {% if order.items.all %}
+              <div class="mt-3 border-t pt-3">
+                <div class="space-y-1">
+                  {% for item in order.items.all|slice:":3" %}
+                    <p class="text-sm text-slate-600">
+                      • {{ item.product_name }}{% if item.selected_size %} / {{ item.selected_size }}{% endif %}{% if item.selected_color %} / {{ item.selected_color }}{% endif %} x {{ item.quantity }}
+                    </p>
+                  {% endfor %}
+                  {% if order.items.all|length > 3 %}
+                    <p class="text-sm font-semibold text-slate-600">+ {{ order.items.all|length|add:"-3" }} more item{{ order.items.all|length|add:"-3"|pluralize }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 py-12 text-center">
+        <div class="mx-auto w-fit">
+          <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <p class="mt-3 font-semibold text-slate-900">No orders yet</p>
+          <p class="mt-1 text-sm text-slate-600">Start shopping to create your first order</p>
+          <a href="{% url 'products:shop' %}" class="mt-4 inline-block rounded-lg bg-emerald-700 px-6 py-2 font-semibold text-white transition hover:bg-emerald-800">Shop Now</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
