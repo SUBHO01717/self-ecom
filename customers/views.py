@@ -1,6 +1,8 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from .forms import ActivateAccountForm
+from django.contrib import messages
 
 from orders.models import Order
 from .forms import CustomerLoginForm
@@ -28,3 +30,28 @@ def dashboard(request):
         "completed_orders_count": completed_orders_count,
         "page_title": "Dashboard"
     })
+
+def activate_account(request):
+    form = ActivateAccountForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+
+        user = form.cleaned_data["user"]
+
+        user.set_password(
+            form.cleaned_data["password1"]
+        )
+        user.save()
+
+        messages.success(
+            request,
+            "Password created successfully. You can now log in."
+        )
+
+        return redirect("customers:login")
+
+    return render(
+        request,
+        "customers/activate_account.html",
+        {"form": form}
+    )

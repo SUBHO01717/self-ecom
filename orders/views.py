@@ -6,6 +6,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.crypto import get_random_string
+from customers.views import activate_account
 
 from cart.cart import Cart
 from customers.models import CustomerProfile
@@ -14,20 +15,57 @@ from .forms import CheckoutForm
 from .models import Order, OrderItem, PromoCode
 
 
+# def _get_or_create_customer(order):
+#     User = get_user_model()
+#     username = order.email or order.phone
+#     user = User.objects.filter(username=username).first() or User.objects.filter(email__iexact=order.email).first()
+#     created = False
+
+#     if user is None:
+#         raw_password = get_random_string(10)
+#         user = User.objects.create_user(username=username, email=order.email, password=raw_password, first_name=order.full_name)
+#         user.set_unusable_password()
+#         user.save()
+#     profile, _ = CustomerProfile.objects.get_or_create(user=user)
+#     profile.phone = order.phone
+#     profile.shipping_address = order.shipping_address
+#     profile.save()
+#     return user, raw_password
+
 def _get_or_create_customer(order):
     User = get_user_model()
+
     username = order.email or order.phone
-    user = User.objects.filter(username=username).first() or User.objects.filter(email__iexact=order.email).first()
-    raw_password = None
+
+    # Check existing customer by username, email or phone
+    user = (
+        User.objects.filter(username=username).first()
+        or User.objects.filter(email__iexact=order.email).first()
+        or User.objects.filter(customer_profile__phone=order.phone).first()
+    )
+
+    created = False
+
     if user is None:
-        raw_password = get_random_string(10)
-        user = User.objects.create_user(username=username, email=order.email, password=raw_password, first_name=order.full_name)
-    profile, _created = CustomerProfile.objects.get_or_create(user=user)
+        created = True
+
+        user = User.objects.create_user(
+            username=username,
+            email=order.email,
+            first_name=order.full_name,
+        )
+
+        # Customer must set password later
+        user.set_unusable_password()
+        user.save()
+
+    profile, _ = CustomerProfile.objects.get_or_create(user=user)
+
     profile.phone = order.phone
     profile.shipping_address = order.shipping_address
     profile.save()
-    return user, raw_password
 
+    return user, created
 
 def checkout(request):
     cart = Cart(request)
@@ -104,7 +142,7 @@ def checkout(request):
             order.shipping_area = selected_area
             order.shipping_cost = shipping_cost
             order.total = total
-            user, raw_password = _get_or_create_customer(order)
+            user, created = _get_or_create_customer(order)
             order.customer = user
             order.save()
             for item in cart:
@@ -128,6 +166,11 @@ def checkout(request):
             cart.clear()
             request.session.pop("selected_shipping_area_id", None)
             login(request, user)
+            if created:
+                messages.info(
+                    request,
+                    "An account has been created for you. To access it later, use your email or phone number and click 'Set Password' on the login page."
+                )
         messages.success(request, "Order placed successfully. Your order is pending confirmation.")
         return redirect("orders:detail", order.pk)
     return render(
