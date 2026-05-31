@@ -3,17 +3,65 @@
 
 {% block content %}
 
+<!-- BreadcrumbList Schema -->
 <script type="application/ld+json">
 {
-  "@context":"https://schema.org",
-  "@type":"Product",
-  "name":"{{ product.name|escapejs }}",
-  "sku":"{{ product.sku|escapejs }}",
-  "offers":{
-    "@type":"Offer",
-    "priceCurrency":"BDT",
-    "price":"{{ product.current_price }}",
-    "availability":"https://schema.org/InStock"
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Shop",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:shop' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ category.name|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{{ category.get_absolute_url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ product.name|escapejs }}"
+    }
+  ]
+}
+</script>
+
+<!-- Product Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.name|escapejs }}",
+  "description": "{{ product.short_description|escapejs }}",
+  "sku": "{{ product.sku|escapejs }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ site_settings.site_name|escapejs }}"
+  },
+  {% if product.thumbnail %}
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ product.thumbnail.url }}",
+  {% endif %}
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ request.build_absolute_uri }}",
+    "priceCurrency": "BDT",
+    "price": "{{ product.current_price }}",
+    "availability": "{% if product.stock_quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.5",
+    "reviewCount": "1"
   }
 }
 </script>

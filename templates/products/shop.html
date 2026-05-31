@@ -1,4 +1,15 @@
 {% extends "base.html" %}
+
+{% block extra_head %}
+  <!-- Pagination SEO -->
+  {% if page_obj.has_previous %}
+    <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+  {% endif %}
+  {% if page_obj.has_next %}
+    <link rel="next" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="mx-auto max-w-7xl px-4 py-12">
   <div class="mb-8">
@@ -82,6 +93,47 @@
             {% include "includes/product_card.html" %}
           {% endfor %}
         </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-12 flex flex-wrap items-center justify-center gap-2">
+          <!-- Previous Page -->
+          {% if page_obj.has_previous %}
+            <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100">
+              First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100">
+              Previous
+            </a>
+          {% endif %}
+
+          <!-- Page Numbers -->
+          {% for num in paginator.page_range %}
+            {% if page_obj.number == num %}
+              <span class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                 class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100">
+                {{ num }}
+              </a>
+            {% endif %}
+          {% endfor %}
+
+          <!-- Next Page -->
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100">
+              Next
+            </a>
+            <a href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+               class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100">
+              Last
+            </a>
+          {% endif %}
+        </div>
+        {% endif %}
       {% else %}
         <div class="rounded-xl border border-slate-200 bg-slate-50 py-12 text-center">
           <p class="text-slate-600">No products matched your filters. Try adjusting your search criteria.</p>

@@ -14,23 +14,6 @@ from .forms import CheckoutForm
 from .models import Order, OrderItem, PromoCode
 
 
-# def _get_or_create_customer(order):
-#     User = get_user_model()
-#     username = order.email or order.phone
-#     user = User.objects.filter(username=username).first() or User.objects.filter(email__iexact=order.email).first()
-#     created = False
-
-#     if user is None:
-#         raw_password = get_random_string(10)
-#         user = User.objects.create_user(username=username, email=order.email, password=raw_password, first_name=order.full_name)
-#         user.set_unusable_password()
-#         user.save()
-#     profile, _ = CustomerProfile.objects.get_or_create(user=user)
-#     profile.phone = order.phone
-#     profile.shipping_address = order.shipping_address
-#     profile.save()
-#     return user, raw_password
-
 def _get_or_create_customer(order):
     User = get_user_model()
 

@@ -2,8 +2,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Essential Meta Tags -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <title>
     {% if seo_object.seo_title %}
@@ -15,17 +17,47 @@
     {% endif %}
   </title>
 
-  <meta name="description" content="{{ seo_object.meta_description|default:'Daily Essentials ecommerce store' }}">
+  <!-- Primary Meta Tags -->
+  <meta name="description" content="{{ seo_object.meta_description|default:'Daily Essentials - Shop quality daily essentials online with fast delivery.' }}">
   <meta name="keywords" content="{{ seo_object.meta_keywords|default:'' }}">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="{{ site_settings.primary_color|default:'#10b981' }}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta property="og:title" content="{% if seo_object.seo_title %}{{ seo_object.seo_title }}{% else %}{{ site_settings.site_name }}{% endif %}">
-  <meta property="og:description" content="{{ seo_object.meta_description|default:'Shop daily essentials online.' }}">
-
+  <meta property="og:description" content="{{ seo_object.meta_description|default:'Shop quality daily essentials online with fast delivery.' }}">
   {% if seo_object.og_image %}
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ seo_object.og_image.url }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+  {% else %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}">
   {% endif %}
 
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+  <meta property="twitter:title" content="{% if seo_object.seo_title %}{{ seo_object.seo_title }}{% else %}{{ site_settings.site_name }}{% endif %}">
+  <meta property="twitter:description" content="{{ seo_object.meta_description|default:'Shop quality daily essentials online with fast delivery.' }}">
+  {% if seo_object.og_image %}
+    <meta property="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ seo_object.og_image.url }}">
+  {% endif %}
+
+  <!-- Canonical URL -->
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+
+  <!-- Preconnect to external resources -->
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://www.google-analytics.com">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -79,6 +111,21 @@
   }
 </style>
 
+  <!-- Organization Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{ site_settings.site_name|escapejs }}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}",
+    "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}",
+    "description": "{{ site_settings.meta_description|default:'Quality daily essentials ecommerce store'|escapejs }}",
+    "sameAs": [
+      {% if site_settings.facebook_page_url %}"{{ site_settings.facebook_page_url }}"{% endif %}
+    ]
+  }
+  </script>
+
   {% if site_settings.google_analytics_id %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.google_analytics_id }}"></script>
     <script>
@@ -123,6 +170,8 @@
   {% endif %}
 
   {{ site_settings.custom_header_scripts|safe }}
+
+  {% block extra_head %}{% endblock %}
 
 </head>
 

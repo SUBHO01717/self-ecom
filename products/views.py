@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+from django.core.paginator import Paginator
 
 from categories.models import Category
 from .models import Product
@@ -12,6 +13,7 @@ def shop(request):
     min_price = request.GET.get("min_price")
     max_price = request.GET.get("max_price")
     sort = request.GET.get("sort", "newest")
+    page = request.GET.get("page", 1)
 
     if category_slug:
         products = products.filter(category__slug=category_slug)
@@ -30,7 +32,18 @@ def shop(request):
         if request.GET.get(key):
             products = products.filter(**{field: True})
     products = products.order_by("created_at" if sort == "oldest" else "-created_at")
-    return render(request, "products/shop.html", {"products": products, "categories": categories, "page_title": "Shop"})
+    
+    # Pagination
+    paginator = Paginator(products, 20)  # Show 20 products per page
+    page_obj = paginator.get_page(page)
+    
+    return render(request, "products/shop.html", {
+        "products": page_obj.object_list, 
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "categories": categories, 
+        "page_title": "Shop"
+    })
 
 
 def product_detail(request, slug):
