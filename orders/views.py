@@ -5,8 +5,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.crypto import get_random_string
-from customers.views import activate_account
+
 
 from cart.cart import Cart
 from customers.models import CustomerProfile
